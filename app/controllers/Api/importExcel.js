@@ -15,10 +15,19 @@ router.get('/', async (req, res, next) => {
     const sessionResults = [];
     const studentsResults = [];
     const studentInfo = [];
+    let temp = null;
 
     try {
         const file = reader.readFile(excel_file);
-        let temp = reader.utils.sheet_to_json(file.Sheets["student_titles"]);
+
+        temp = reader.utils.sheet_to_json(file.Sheets["students_results"]);
+        const isDuplicate = ResultModel.findOne({telegramId: temp[0]["Telegram ID"], session_no: res["Session_no"]});
+
+        if (isDuplicate) {
+            return res.json({state: "failed", data: "already exist!"});
+        }
+
+        temp = reader.utils.sheet_to_json(file.Sheets["student_titles"]);
         const res0 = await TitleModel.insertMany(temp);
 
         temp = reader.utils.sheet_to_json(file.Sheets["session_results"]);
@@ -81,10 +90,10 @@ router.get('/', async (req, res, next) => {
         const res2 = await ResultModel.insertMany(studentsResults);
     } catch (e) {
         console.log(e);
-        return res.json("failed");
+        return res.json({state: "failed", data: "server error"});
     }
 
-    return res.json("success");
+    return res.json({state: "success"});
 });
 
 module.exports = router;

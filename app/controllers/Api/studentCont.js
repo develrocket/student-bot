@@ -10,12 +10,16 @@ module.exports = function(){
         filter: async function (req, res) {
             const {telegramId, term} = req.query;
             let filterQuery = {telegramId: telegramId};
-            const results = await StudentResultModel.find(filterQuery).populate("session").sort({session_no: -1});
+            const results = await StudentResultModel.find(filterQuery).sort({session_no: -1}).populate("session");
+
+            if (results.length === 0) {
+                return res.json({result: "success", data: []});
+            }
 
             if (term && term !== "") {
                 let delta = term === "lastday" ? 1 : term === "lastweek" ? 7 : term === "lastmonth" ? 30 :
                     term === "last3months" ? 90 : 0;
-                const now = new Date();
+                const now = new Date(results[0].session.session_start);
                 const from = now.setDate(now.getDate() - delta);
                 const filteredData = results.filter((item) => {
                     return item.session.session_start > from;
@@ -27,43 +31,10 @@ module.exports = function(){
             }
         },
 
-        getAllFortuna: async function (req, res) {
-            const results = await StudentResultModel.find().sort({session_no: -1});
-
-                // merge all stu
-                const studentResult = [];
-                for (const item of results) {
-                    const filteredId = studentResult.findIndex((stuItem) => item.telegramId === stuItem.telegramId);
-                    if (filteredId < 0) {
-                        const temp = {
-                            username: item.username,
-                            telegramId: item.telegramId,
-                            title: item.title,
-                            total_fortuna_user: item.total_fortuna_user,
-                        };
-                        studentResult.push(temp);
-                    }
-                }
-
-                return res.json({result: "success", data: studentResult});
-        },
-
-        getInfo: async function (req, res) {
-            const {telegramId} = req.query;
-            let filterQuery = {telegramId: telegramId};
-            const results = await StudentResultModel.findOne(filterQuery).sort({session_no: -1});
-
-            if (results) {
-                return res.json({username: results.username, telegramId: results.telegramId, title: results.title,
-                    sum_point: results.sum_point});
-            }
-            return res.json({result: "failed", data: "wrong parameter"});
-        },
-
         upRank: async function (req, res) {
             const {telegramId, term} = req.query;
             let filterQuery = {telegramId: telegramId};
-            const results = await StudentResultModel.find(filterQuery).populate("session").sort({session_no: -1});
+            const results = await StudentResultModel.find(filterQuery).sort({session_no: -1}).populate("session");
             if (results.length === 0) {
                 return res.json({result: "success", data: []});
             }
@@ -91,15 +62,52 @@ module.exports = function(){
             }
         },
 
+        getAllFortuna: async function (req, res) {
+            const results = await StudentResultModel.find().sort({session_no: -1});
+
+                // merge all stu
+                const studentResult = [];
+                for (const item of results) {
+                    const filteredId = studentResult.findIndex((stuItem) => item.telegramId === stuItem.telegramId);
+                    if (filteredId < 0) {
+                        const temp = {
+                            username: item.username,
+                            telegramId: item.telegramId,
+                            title: item.title,
+                            total_fortuna_user: item.total_fortuna_user,
+                        };
+                        studentResult.push(temp);
+                    }
+                }
+
+                return res.json({result: "success", data: studentResult});
+        },
+
+        getInfo: async function (req, res) {
+            const {telegramId} = req.query;
+            let filterQuery = {telegramId: telegramId};
+            const results = await StudentResultModel.find(filterQuery).sort({session_no: -1});
+
+            if (results.length > 0) {
+                return res.json({username: results[0].username, telegramId: results[0].telegramId, title: results[0].title,
+                    sum_point: results[0].sum_point});
+            }
+            return res.json({result: "failed", data: "wrong parameter"});
+        },
+
         sort: async function (req, res) {
             const {term} = req.query;
-            const results = await StudentResultModel.find().populate("session");
+            const results = await StudentResultModel.find().sort({session_no: -1}).populate("session");
+
+            if (results.length === 0) {
+                return res.json({result: "success", data: []});
+            }
 
             if (term && term !== "") {
                 // filter with term
                 let delta = term === "lastday" ? 1 : term === "lastweek" ? 7 : term === "lastmonth" ? 30 :
                     term === "last3months" ? 90 : 0;
-                const now = new Date();
+                const now = new Date(results[0].session.session_start);
                 const from = now.setDate(now.getDate() - delta);
                 const filteredData = results.filter((item) => {
                     return item.session.session_start > from;
