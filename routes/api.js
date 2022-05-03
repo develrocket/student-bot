@@ -1,12 +1,15 @@
 /* eslint-disable global-require, func-names */
 
 const studentCont = require('../app/controllers/Api/studentCont')();
+const importCont = require('../app/controllers/Api/importCont')();
 
 module.exports = function (app) {
     // home
     app.use('/api', require('../app/controllers/Api/home'));
 
-    app.use('/api/import-excel', require('../app/controllers/Api/importExcel'));
+    app.get('/api/import-excel', importCont.importExcel);
+
+    app.post('/api/get_session_data', importCont.getSessionData);
 
     app.get('/api/student_result', studentCont.filter);
     app.get('/api/sort_student', studentCont.sort);
