@@ -3,6 +3,7 @@ const router = express.Router();
 
 const StudentResultModel = require('../../models/studentResult');
 const SessionModel = require('../../models/sessionResult');
+const axios = require('axios').default;
 
 module.exports = function(){
 
@@ -10,6 +11,7 @@ module.exports = function(){
         fetchSession: async function(req, res) {
             let sessions = await SessionModel.find().sort({session_no: -1}).limit(1);
             let lastId = sessions[0].no;
+            console.log(lastId);
             axios.get('https://fortunaenglish.com/fetch/livesession?lastId=' + lastId)
               .then(function (response) {
                   // handle success
