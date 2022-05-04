@@ -3,10 +3,31 @@ const router = express.Router();
 
 const StudentResultModel = require('../../models/studentResult');
 const SessionModel = require('../../models/sessionResult');
+const axios = require('axios').default;
 
 module.exports = function(){
 
     return {
+        fetchSession: async function(req, res) {
+            let sessions = await SessionModel.find().sort({session_no: -1}).limit(1);
+            let lastId = sessions[0].session_no;
+            console.log(lastId);
+            axios.get('https://fortunaenglish.com/api/fetch/livesession?lastId=' + lastId)
+              .then(function (response) {
+                  // handle success
+                  console.log(response);
+                  res.json({data: response});
+              })
+              .catch(function (error) {
+                  // handle error
+                  console.log(error);
+              })
+              .then(function () {
+                  // always executed
+              });
+
+        },
+
         filter: async function (req, res) {
             const {telegramId, term} = req.query;
             let filterQuery = {telegramId: telegramId};
