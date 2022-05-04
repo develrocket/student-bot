@@ -10,9 +10,9 @@ module.exports = function(){
     return {
         fetchSession: async function(req, res) {
             let sessions = await SessionModel.find().sort({session_no: -1}).limit(1);
-            let lastId = sessions[0].no;
+            let lastId = sessions[0].session_no;
             console.log(lastId);
-            axios.get('https://fortunaenglish.com/fetch/livesession?lastId=' + lastId)
+            axios.get('https://fortunaenglish.com/api/fetch/livesession?lastId=' + lastId)
               .then(function (response) {
                   // handle success
                   console.log(response);
