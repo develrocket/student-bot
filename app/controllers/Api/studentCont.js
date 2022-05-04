@@ -12,20 +12,12 @@ module.exports = function(){
             let sessions = await SessionModel.find().sort({session_no: -1}).limit(1);
             let lastId = sessions[0].session_no;
             console.log(lastId);
-            axios.get('https://fortunaenglish.com/api/fetch/livesession?lastId=' + lastId)
-              .then(function (response) {
-                  // handle success
-                  console.log(response);
-                  res.json({data: response});
-              })
-              .catch(function (error) {
-                  // handle error
-                  console.log(error);
-              })
-              .then(function () {
-                  // always executed
-              });
-
+            try {
+                let res = await axios.get('https://fortunaenglish.com/api/fetch/livesession?lastId=' + lastId);
+                console.log(res.data);
+            } catch (err) {
+                console.log(err);
+            }
         },
 
         filter: async function (req, res) {
