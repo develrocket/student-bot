@@ -98,6 +98,45 @@ module.exports = function() {
             return res.json({state: "success"});
         },
 
+        getStudentResult: async function (req, res) {
+            const stuResults = req.body.data;
+            const pupilsInfo = await Utils.getPupilsInfo();
+            let createdCount = 0;
+
+            stuResults.sort((a, b) => a.session_no - b.session_no * 1);
+
+            for (const stuResult of stuResults) {
+                const filteredStu = await ResultModel.find({telegramId: stuResult.telegramId, session_no: stuResult.session_no});
+                if (filteredStu.length === 0) {
+                    const session = await SessionModel.findOne({session_no: stuResult.session_no});
+                    if (session) {
+                        const lastestData = pupilsInfo.find((item) => item.telegramId == stuResult.telegramId);
+                        const sumPoint = lastestData.sum_point + stuResult.session_points*1;
+                        const sumFortuna = lastestData.total_fortuna_user + stuResult.session_rank*0.1;
+                        const title = await Utils.getTitle(sumPoint);
+                        createdCount++;
+
+                        const newRes = new ResultModel({
+                            username: stuResult.username,
+                            telegramId: stuResult.telegramId,
+                            session: session._id,
+                            session_no: stuResult.session_no,
+                            session_points: stuResult.session_points,
+                            session_rank: stuResult.session_rank,
+                            fortuna_points: stuResult.session_rank * 0.1,
+                            title: title,
+                            sum_point: sumPoint,
+                            total_fortuna_user: sumFortuna,
+                        });
+                        newRes.save();
+
+                    }
+                }
+            }
+
+            return res.json({state: "success", data: `${createdCount} rows created successfully`});
+        },
+
         getSessionData: async function (req, res) {
             const sessionData = req.body.sessionData;
             const totalData = await SessionModel.find();

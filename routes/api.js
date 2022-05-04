@@ -10,6 +10,7 @@ module.exports = function (app) {
     app.get('/api/import-excel', importCont.importExcel);
 
     app.post('/api/get_session_data', importCont.getSessionData);
+    app.post('/api/get_student_results', importCont.getStudentResult);
 
     app.get('/api/student_result', studentCont.filter);
     app.get('/api/sort_student', studentCont.sort);

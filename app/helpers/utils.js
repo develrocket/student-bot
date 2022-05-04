@@ -1,4 +1,5 @@
 const TitleModel = require('../models/studentTitle');
+const StudentResultModel = require('../models/studentResult');
 
 module.exports = {
     randomString(length) {
@@ -24,5 +25,19 @@ module.exports = {
             }
         }
         return "";
+    },
+
+    async getPupilsInfo() {
+        const res = await StudentResultModel.find().sort({session_no: - 1});
+        let pupilsInfo = [];
+
+        for (const stuRes of res) {
+            const filteredId = pupilsInfo.findIndex((item) => item.telegramId === stuRes.telegramId );
+            if (filteredId < 0) {
+                pupilsInfo.push(stuRes);
+            }
+        }
+
+        return pupilsInfo;
     }
 };
