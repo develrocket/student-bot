@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
-const axios = require("axios");
 
 const ResultModel = require('../../models/studentResult');
 const SessionModel = require('../../models/sessionResult');
